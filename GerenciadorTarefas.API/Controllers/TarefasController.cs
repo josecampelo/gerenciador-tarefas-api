@@ -33,6 +33,7 @@ public class TarefasController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(TarefaDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public ActionResult<TarefaDto> CriarTarefa([FromBody] CriarTarefaDto criarTarefaDto)
     {
         try
@@ -44,8 +45,9 @@ public class TarefasController : ControllerBase
         {
             return BadRequest(ex.Message);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.WriteLine($"Erro ao criar tarefa: {ex.Message}"); // Logging
             return StatusCode(StatusCodes.Status500InternalServerError, "Erro interno ao criar a tarefa.");
         }
     }
@@ -57,12 +59,22 @@ public class TarefasController : ControllerBase
     /// <param name="dataVencimento">Filtro opcional por data de vencimento da tarefa (no formato YYYY-MM-DD).</param>
     /// <returns>Uma coleção de tarefas.</returns>
     /// <response code="200">Lista de tarefas retornada com sucesso.</response>
+    /// <response code="500">Erro interno ao listar as tarefas.</response>
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<TarefaDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public ActionResult<IEnumerable<TarefaDto>> ListarTarefas([FromQuery] string? status, [FromQuery] DateTime? dataVencimento)
     {
-        var tarefas = _tarefaService.ListarTarefas(status, dataVencimento);
-        return Ok(tarefas);
+        try
+        {
+            var tarefas = _tarefaService.ListarTarefas(status, dataVencimento);
+            return Ok(tarefas);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao listar tarefas: {ex.Message}"); // Logging
+            return StatusCode(StatusCodes.Status500InternalServerError, "Erro interno ao listar as tarefas.");
+        }
     }
 
     /// <summary>
@@ -72,17 +84,27 @@ public class TarefasController : ControllerBase
     /// <returns>A tarefa encontrada.</returns>
     /// <response code="200">Tarefa encontrada com sucesso.</response>
     /// <response code="404">Tarefa não encontrada.</response>
+    /// <response code="500">Erro interno ao obter a tarefa.</response>
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(TarefaDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public ActionResult<TarefaDto> ObterTarefaPorId(Guid id)
     {
-        var tarefa = _tarefaService.ObterTarefaPorId(id);
-        if (tarefa == null)
+        try
         {
-            return NotFound();
+            var tarefa = _tarefaService.ObterTarefaPorId(id);
+            if (tarefa == null)
+            {
+                return NotFound();
+            }
+            return Ok(tarefa);
         }
-        return Ok(tarefa);
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao obter tarefa por ID {id}: {ex.Message}"); // Logging
+            return StatusCode(StatusCodes.Status500InternalServerError, "Erro interno ao obter a tarefa.");
+        }
     }
 
     /// <summary>
@@ -99,6 +121,7 @@ public class TarefasController : ControllerBase
     [ProducesResponseType(typeof(TarefaDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public ActionResult<TarefaDto> AtualizarTarefa(Guid id, [FromBody] AtualizarTarefaDto atualizarTarefaDto)
     {
         if (id != atualizarTarefaDto.Id)
@@ -119,8 +142,9 @@ public class TarefasController : ControllerBase
         {
             return BadRequest(ex.Message);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.WriteLine($"Erro ao atualizar tarefa {id}: {ex.Message}"); // Logging
             return StatusCode(StatusCodes.Status500InternalServerError, "Erro interno ao atualizar a tarefa.");
         }
     }
@@ -132,16 +156,26 @@ public class TarefasController : ControllerBase
     /// <returns>A tarefa que foi excluída.</returns>
     /// <response code="200">Tarefa excluída com sucesso.</response>
     /// <response code="404">Tarefa não encontrada.</response>
+    /// <response code="500">Erro interno ao excluir a tarefa.</response>
     [HttpDelete("{id}")]
     [ProducesResponseType(typeof(TarefaDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public ActionResult<TarefaDto> ExcluirTarefa(Guid id)
     {
-        var tarefaExcluida = _tarefaService.ExcluirTarefa(id);
-        if (tarefaExcluida == null)
+        try
         {
-            return NotFound();
+            var tarefaExcluida = _tarefaService.ExcluirTarefa(id);
+            if (tarefaExcluida == null)
+            {
+                return NotFound();
+            }
+            return Ok(tarefaExcluida);
         }
-        return Ok(tarefaExcluida);
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao excluir tarefa {id}: {ex.Message}"); // Logging
+            return StatusCode(StatusCodes.Status500InternalServerError, "Erro interno ao excluir a tarefa.");
+        }
     }
 }

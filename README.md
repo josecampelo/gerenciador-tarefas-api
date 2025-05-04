@@ -67,10 +67,11 @@ A API de Gerenciamento de Tarefas oferece as seguintes funcionalidades:
         {
           "titulo": "Nova Tarefa Importante",
           "descricao": "Detalhes da tarefa.",
-          "dataVencimento": "2025-05-10T15:00:00",
-          "status": "EmProgresso"
+          "dataVencimento": "2026-05-10T15:00:00",
+          "status": 1
         }
         ```
+    * status: 0 = 
     * Retorna um código de status `201 Created` com a tarefa criada no corpo da resposta e a URL para acessá-la no cabeçalho `Location`.
 
 * **Listar Tarefas (GET /api/Tarefas):**
@@ -94,7 +95,7 @@ A API de Gerenciamento de Tarefas oferece as seguintes funcionalidades:
         {
           "id": "...",
           "titulo": "Título Atualizado",
-          "status": "Concluida"
+          "status": 2
         }
         ```
     * Retorna um código de status `200 OK` com a tarefa atualizada no corpo da resposta se bem-sucedida, `400 Bad Request` se o ID na rota não corresponder ao ID no corpo ou se os dados forem inválidos, ou `404 Not Found` se a tarefa não for encontrada.

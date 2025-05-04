@@ -13,9 +13,21 @@ public class Tarefa
     public StatusTarefa Status { get; set; }
 }
 
+/// <summary>
+/// Enum que representa o status de uma tarefa.
+/// </summary>
 public enum StatusTarefa
 {
+    /// <summary>
+    /// A tarefa ainda não foi iniciada.
+    /// </summary>
     Pendente,
+    /// <summary>
+    /// A tarefa está em andamento.
+    /// </summary>
     EmProgresso,
+    /// <summary>
+    /// A tarefa foi concluída.
+    /// </summary>
     Concluida
 }

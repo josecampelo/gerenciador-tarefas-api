@@ -1,0 +1,28 @@
+* text=auto eol=lf
+
+*.cs text
+*.csproj text
+*.sln text
+*.json text
+*.xml text
+*.yaml text
+*.yml text
+*.md text
+*.html text
+*.css text
+*.js text
+*.ts text
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.exe binary
+*.dll binary
+*.pdf binary
+
+*.cs linguist-language=C#
+
+.gitattributes export-ignore
+.gitignore export-ignore

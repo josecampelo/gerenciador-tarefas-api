@@ -1,11 +1,17 @@
 using GerenciadorTarefas.API.DTOs;
 using GerenciadorTarefas.API.Domain;
+using GerenciadorTarefas.API.Data;
 
 namespace GerenciadorTarefas.API.Services;
 
 public class TarefaService : ITarefaService
 {
-    private readonly List<Tarefa> _tarefas = new List<Tarefa>();
+    private readonly ITarefaRepository _tarefaRepository;
+
+    public TarefaService(ITarefaRepository tarefaRepository)
+    {
+        _tarefaRepository = tarefaRepository;
+    }
 
     public TarefaDto CriarTarefa(CriarTarefaDto criarTarefaDto)
     {
@@ -28,14 +34,14 @@ public class TarefaService : ITarefaService
             Status = criarTarefaDto.Status
         };
 
-        _tarefas.Add(novaTarefa);
-
-        return ConverterParaDto(novaTarefa);
+        var tarefaAdicionada = _tarefaRepository.Adicionar(novaTarefa);
+        return ConverterParaDto(tarefaAdicionada);
     }
 
     public IEnumerable<TarefaDto> ListarTarefas(string? status, DateTime? dataVencimento)
     {
-        var query = _tarefas.AsQueryable();
+        var tarefas = _tarefaRepository.ObterTodos();
+        var query = tarefas.AsQueryable();
 
         if (!string.IsNullOrEmpty(status) && Enum.TryParse<StatusTarefa>(status, true, out var statusFiltro))
         {
@@ -52,14 +58,13 @@ public class TarefaService : ITarefaService
 
     public TarefaDto? ObterTarefaPorId(Guid id)
     {
-        var tarefa = _tarefas.FirstOrDefault(t => t.Id == id);
-
+        var tarefa = _tarefaRepository.ObterPorId(id);
         return tarefa != null ? ConverterParaDto(tarefa) : null;
     }
 
     public TarefaDto? AtualizarTarefa(AtualizarTarefaDto atualizarTarefaDto)
     {
-        var tarefaExistente = _tarefas.FirstOrDefault(t => t.Id == atualizarTarefaDto.Id);
+        var tarefaExistente = _tarefaRepository.ObterPorId(atualizarTarefaDto.Id);
 
         if (tarefaExistente == null)
         {
@@ -80,7 +85,6 @@ public class TarefaService : ITarefaService
             {
                 throw new ArgumentException("A data de vencimento deve ser no futuro.", nameof(atualizarTarefaDto.DataVencimento));
             }
-
             tarefaExistente.DataVencimento = atualizarTarefaDto.DataVencimento;
         }
         if (atualizarTarefaDto.Status.HasValue)
@@ -88,20 +92,18 @@ public class TarefaService : ITarefaService
             tarefaExistente.Status = atualizarTarefaDto.Status.Value;
         }
 
-        return ConverterParaDto(tarefaExistente);
+        var tarefaAtualizada = _tarefaRepository.Atualizar(tarefaExistente);
+        return ConverterParaDto(tarefaAtualizada);
     }
 
     public TarefaDto? ExcluirTarefa(Guid id)
     {
-        var tarefaParaRemover = _tarefas.FirstOrDefault(t => t.Id == id);
-
+        var tarefaParaRemover = _tarefaRepository.ObterPorId(id);
         if (tarefaParaRemover != null)
         {
-            _tarefas.Remove(tarefaParaRemover);
-
-            return ConverterParaDto(tarefaParaRemover);
+            var tarefaRemovida = _tarefaRepository.Remover(tarefaParaRemover);
+            return tarefaRemovida != null ? ConverterParaDto(tarefaRemovida) : null;
         }
-
         return null;
     }
 
